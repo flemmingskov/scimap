@@ -30,7 +30,7 @@ def main():
     exec(open("./apps/function_library.py").read())    
 
     st.sidebar.title("Tools for sciencescaping")
-    st.sidebar.info("Version 0.99 - May 11, 2021")
+    st.sidebar.info("GitHub version 1.00 - July 13, 2022")
     
     # Menu layout
     page = st.sidebar.selectbox("Choose a tool page: ",
@@ -86,7 +86,7 @@ def main():
         '''
         This a develooping project and you are very welcome to *contribute* your 
         comments or questions to
-        [GitLab](https://gitlab.com/flemmingskov/plosone_science_map). 
+        [GitHub](https://github.com/flemmingskov/scimap). 
         ''')
     st.sidebar.title("About")
     st.sidebar.info(
