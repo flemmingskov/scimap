@@ -3,7 +3,7 @@ File: tool_main.py
 Author: Flemming Skov 
 Main streamlit/python file
 Start app from a terminal window typing: "streamlit run 'path'/tool_main.py
-Latest version: May 11 2021
+Latest version: July 13 2021
 '''
 
 # Import libraries
@@ -29,7 +29,7 @@ exec(open("./apps/function_library.py").read())
 def main():
     exec(open("./apps/function_library.py").read())    
 
-    st.sidebar.title("Tools for sciencescaping")
+    st.sidebar.title("Tools for science mapping")
     st.sidebar.info("GitHub version 1.00 - July 13, 2022")
     
     # Menu layout
@@ -81,7 +81,7 @@ def main():
 
     st.sidebar.markdown("   ")
     #st.sidebar.image("scimap.png", caption="Science map")
-    st.sidebar.title("GitLab - code")
+    st.sidebar.title("GitHub - code")
     st.sidebar.info(
         '''
         This a develooping project and you are very welcome to *contribute* your 
