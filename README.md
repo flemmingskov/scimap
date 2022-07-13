@@ -1,8 +1,7 @@
-# obsidian-note-maker
+# Science mapping
 
-> Python/Streamlit tool to convert data from Web of Science to Obsidian .md files
+> Based on the version published in plosONE
 
-The aim of the project is to create a tool that can be used directly in any web-browser
+Playground for new developments and ad-hoc-projects
 
-
-##### Test version, April, 30 - 2022
+##### First version, July, 13 - 2022
