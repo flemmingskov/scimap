@@ -44,6 +44,7 @@ def main():
                     "7 - prepare data for mapping",
                     "8 - create maps",
                     "9 - keyword browser",
+                    "10 - cluster maps",
                     " ... not used ..."])
 
     if page == "Home":
@@ -75,6 +76,9 @@ def main():
 
     elif page == "9 - keyword browser":
         exec(open("./apps/map2_keyword_browser.py").read())
+
+    elif page == "10 - cluster maps":
+        exec(open("./apps/map3_cluster_maps.py").read())
 
     # elif page == "slot not used ...":
     #     exec(open("./apps/xxxx.py").read())      
