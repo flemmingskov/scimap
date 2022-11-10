@@ -105,6 +105,8 @@ if run_script:
                     wosIn_df = wosIn_df[wosIn_df.columns[[index_AU, index_TI, index_DE, index_ID, index_AB, index_C1, index_EM, index_RI,
                                                         index_FU, index_Z9, index_SO, index_PY, index_WC, index_SC, index_UT]]]
 
+                    
+
                     wosIn_df.replace(r'\s+', np.nan, regex=True).replace('', np.nan)
                     wosIn_df = wosIn_df.fillna('')
                     wosIn_df[100] = time_stamp    # New column with time stamp (today)
@@ -113,7 +115,9 @@ if run_script:
                                         'journal', 'year', 'wos_sub_cat1',
                                         'wos_sub_cat2', 'wosid', 'time_stamp']
                     imported_data_df = pd.concat([imported_data_df, wosIn_df])
-
+                    
+                    # st.dataframe(wosIn_df)
+                    # sys.exit()
 
             imported_data_df = imported_data_df.drop_duplicates(subset='wosid', keep='last')
 

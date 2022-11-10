@@ -6,7 +6,7 @@ else:
     primary_path = 'C:/Users/au3406/iCloudDrive/Desktop/'
 
 # update to create list of possible workspaces to each page
-list_secondary_paths = ['scimap/biogeo/', 'scimap/biogeo/research/', 'scimap/sandbox/', 'scimap/PLOS/au_biology/']
+list_secondary_paths = ['scimap/biogeo/','scimap/cognition/',  'scimap/biogeo/research/', 'scimap/sandbox/', 'scimap/PLOS/au_biology/']
 
 # variables related to layout and appearance
 expander_space = 2  # number of empty lines at the end of the expander

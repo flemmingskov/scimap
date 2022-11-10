@@ -25,7 +25,7 @@ elif mapping_unit == 'Subject categories':
     column_identifier = 'cat'
     sort_column = 'weight'
     data_shade_points_table = 'catD'
-    #data_keywords_table = 'catK'
+    data_keywords_table = 'catK'
     data_papers_table = 'papI'
 elif mapping_unit == 'Institutions':
     data_shade_center_table = 'insC'
@@ -175,11 +175,12 @@ with st.expander("Filters ..."):
     data_papers = data_papers.dropna()
 
 
-
     # import density data by year
     data_shade_points = import_data(overlay_db, data_shade_points_table)
     data_shade_points = data_shade_points[((data_shade_points['year']>= start_year) & \
             (data_shade_points['year']<= end_year))]
+
+    
 
 
     # preparing data
@@ -303,20 +304,24 @@ with st.expander("Export map ..."):
     if export_map:
         fig.savefig(destination + exportFile, bbox_inches = 'tight', dpi = img_res)
 
-# with st.expander("Common keywords ..."):
-#     # show most common keywords for selected set of records
-#     selResKey = data_keywords[data_keywords[column_identifier] == category_select]
-#     selResKey = selResKey.dropna()
-#     selResKey.sort_values(by='year', ascending=0)
+with st.expander("Common keywords ..."):
+    # show most common keywords for selected set of records
+    data_keywords = import_data(overlay_db, data_keywords_table)
 
-#     totList = selResKey['keyword'].value_counts()
-#     totList = pd.DataFrame(totList).reset_index()
+    selResKey = data_keywords[data_keywords[column_identifier] == category_select]
+    selResKey = selResKey.dropna()
+    selResKey.sort_values(by='year', ascending=0)
 
-#     totChart = alt.Chart(totList[ : 60]).mark_bar(color='lightblue').encode(
-#         x='keyword:Q',
-#         y=alt.Y('index:N', sort=alt.EncodingSortField(field="keyword", op="sum", order='descending'))
-#     ).properties(title="All years", width=750)
+    totList = selResKey['keyword'].value_counts()
+    totList = pd.DataFrame(totList).reset_index()
 
-#     st.altair_chart(totChart)
+    st.dataframe(totList)
+
+    # totChart = alt.Chart(totList[ : 60]).mark_bar(color='lightblue').encode(
+    #     x='keyword:Q',
+    #     y=alt.Y('index:N', sort=alt.EncodingSortField(field="keyword", op="sum", order='descending'))
+    # ).properties(title="All years", width=750)
+
+    # st.altair_chart(totChart)
 
 print('... mapping')
