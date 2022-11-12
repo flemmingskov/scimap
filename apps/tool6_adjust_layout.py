@@ -113,6 +113,9 @@ with st.expander("Adjustment settings  ..."):
         st.write(' ')
 
 # EXPANDED DATA
+st.dataframe(keyword_FR)
+
+
 run_FR_adjust =  st.checkbox('Show adjusted layout', value=False,  key='runFRexp')
 if run_FR_adjust:
     begin_time = datetime.datetime.now()
@@ -134,15 +137,15 @@ if run_FR_adjust:
                 keyword_list.append(row[1])
                 x_list.append(row[2])
                 y_list.append(row[3])
-                distance_list.append(row[8])
-                bearing_list.append(row[9])
+                distance_list.append(row[9])
+                bearing_list.append(row[10])
 
-                new_dist = normalize([row[8]], {'actual': {'lower': 0, 'upper': max_distance}, 'desired': {'lower': donut_hole, 'upper': 0.5,}})
+                new_dist = normalize([row[9]], {'actual': {'lower': 0, 'upper': max_distance}, 'desired': {'lower': donut_hole, 'upper': 0.5,}})
                 new_dist = float(new_dist[0])
                 newdistance_list.append(new_dist)
 
-                new_x = new_dist*np.cos(np.radians(90-row[9]))
-                new_y = new_dist*np.sin(np.radians(90-row[9]))
+                new_x = new_dist*np.cos(np.radians(90-row[10]))
+                new_y = new_dist*np.sin(np.radians(90-row[10]))
 
                 # vertical and horizontal adjustments
                 new_x = new_x + x_adjust
