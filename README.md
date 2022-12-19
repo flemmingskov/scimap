@@ -1,6 +1,6 @@
 # Tool for science mapping
 
-> Based on the version published in plosONE
+> Based on the tool published in plosONE
 Skov, F. 2021. Science maps for exploration, navigation, and reflection—A graphic approach to strategic thinking. PLOSONE
 https://doi.org/10.1371/journal.pone.0262081
 
