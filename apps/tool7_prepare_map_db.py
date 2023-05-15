@@ -224,7 +224,9 @@ if run_script:
 
             wosCoor = wosCoordPivot.merge(subset, on='wosid', how='left')
             wosCoor = wosCoor.drop_duplicates(['wosid'])
-            dataInCites = dataIn[['wosid', 'cites', 'authors', 'title']]
+            
+            #  CHANGE APRIL 15 2023 (original):  dataInCites = dataIn[['wosid', 'cites', 'authors', 'title', ]]
+            dataInCites = dataIn[['wosid', 'cites', 'authors', 'title', 'journal' ]]
         
             dataInCites = dataInCites.sort_values(['cites'], ascending=[0])
             dataInCites.insert(0, 'rank', range(1, len(dataInCites)+1))
@@ -464,7 +466,36 @@ if run_script:
             autPivotCoord.columns = ['ID', 'name', 'xcoor', 'ycoor', 'weight'] 
             autPivotCoord.to_sql('autC', outputdata_db_connection, if_exists='replace')
 
-        # STEP 8 - closing connection
+        #### NEW PROGRAMMING!!  April 15, 2023
+
+
+        # STEP 8 - finding mean coordinates and sum cites for individual Journals      
+            #instMerge = pd.merge(dfStep2, wosCoordPivot, on='wosid', how='left')
+            
+            ##  mean coordinates
+            journalPivotCoor = pd.pivot_table(wosCoor, index=['journal'],
+                                        values=['xcoor', 'ycoor'],
+                                        aggfunc=calculation_mode)
+            journalPivotCoor = journalPivotCoor[['xcoor', 'ycoor']].iloc[1:]
+            journalPivotCoor.reset_index(inplace=True)
+
+           ##  sum cites
+            journalPivotCites = pd.pivot_table(wosCoor, index=['journal'],
+                                        values=['cites'],
+                                        aggfunc='sum')
+            journalPivotCites = journalPivotCites[['cites']].iloc[1:]
+            journalPivotCites.reset_index(inplace=True)
+           
+            ##  merging tables
+            journalPivotCoor = journalPivotCoor.merge(journalPivotCites, on='journal', how='left')
+            #journalPivotCoor = journalPivotCoor.merge(countPivotCount, on='country', how='left')
+            journalPivotCoor.columns = ['journal', 'xcoor','ycoor', 'cites']
+            journalPivotCoor.to_sql('jourC', outputdata_db_connection, if_exists='replace')
+
+
+            
+
+        # STEP 9 - closing connection
             outputdata_db_connection.close()
             print('... step 7 - preparation of map, including last step in: ' + str(datetime.datetime.now() - begin_time))     
 

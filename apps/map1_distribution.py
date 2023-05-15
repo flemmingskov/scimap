@@ -10,7 +10,7 @@ st.header("DISTRIBUTION MAPPING")
 st.markdown('___')
 
 mapping_unit = st.radio("Mapping focus (select which entity to map under 'Filters') ",\
-    ('Subject categories', 'Keywords', 'Researchers', 'Institutions'))
+    ('Keywords', 'Subject categories', 'Researchers', 'Journals', 'Institutions'))
 
 # Mapping units
 if mapping_unit == 'Researchers':
@@ -41,6 +41,17 @@ elif mapping_unit == 'Keywords':
     data_shade_points_table = 'papK'
     #data_keywords_table = 'papK'
     data_papers_table = 'papI'
+
+##### NEW (04_15_23)
+
+if mapping_unit == 'Journals':
+    data_shade_center_table = 'jourC'
+    column_identifier = 'journal'
+    sort_column = 'cites'
+    data_shade_points_table = 'papI'
+    #data_keywords_table = 'autK'
+    data_papers_table = 'papI'
+
   
 
 #st.markdown('___')
@@ -117,7 +128,7 @@ with st.expander("Map & graphic settings ... ..."):
     show_captions = col1.checkbox("Show text labels", value=False, key='showlabels')
     adjust_labels = col2.checkbox("Adjust text labels", value=False, key='adjustlabels_checkbox')
 
-    number_of_labels = col1.slider('Number of text labels (from them most common):', 0, 300, 15, 1, \
+    number_of_labels = col1.slider('Number of text labels (from them most common):', 0, 300, 5, 1, \
         key='number_of_labels')
     number_of_levels = col2.slider('Number of contour lines:', 2, 50, 20, 1, \
         key='number_of_levels')
@@ -154,7 +165,7 @@ with st.expander("Filters ..."):
     data_shade_center = import_data(overlay_db, data_shade_center_table)
     data_shade_center = data_shade_center.sort_values(by=sort_column, ascending=0)
     data_shade_center = data_shade_center.reset_index(drop=True)
-    top10 =data_shade_center[:175]
+    top10 =data_shade_center[:500]
 
     category_list = top10[column_identifier].to_numpy().tolist()
     category_list.append("All papers")
@@ -234,7 +245,7 @@ fig = plt.figure(figsize=figsize)
 ax = plt.axes()
 
 if show_title:
-    fig_title = category_select
+    fig_title = category_select.lower() + ' - ' + str(start_year) + '-' + str(end_year)
 else:
     fig_title = " "
 plt.title(fig_title, fontsize=35)
@@ -294,6 +305,9 @@ st.write(fig)
 if st.checkbox('Show records in chosen category', value=False, key='show_df_category'):
     st.dataframe(data_to_show)
 
+## TO BE REMOVED !!!
+export_file_suggested_name = 'all' + str(start_year) + '_' + str(end_year)
+
 with st.expander("Export map ..."):
     destination = st.text_input("Export to:", value=my_workspace, key="export_destination")
     exportFile = st.text_input("Export map file:", value=export_file_suggested_name, \
@@ -304,18 +318,18 @@ with st.expander("Export map ..."):
     if export_map:
         fig.savefig(destination + exportFile, bbox_inches = 'tight', dpi = img_res)
 
-with st.expander("Common keywords ..."):
-    # show most common keywords for selected set of records
-    data_keywords = import_data(overlay_db, data_keywords_table)
+# with st.expander("Common keywords ..."):
+#     # show most common keywords for selected set of records
+#     data_keywords = import_data(overlay_db, data_keywords_table)
 
-    selResKey = data_keywords[data_keywords[column_identifier] == category_select]
-    selResKey = selResKey.dropna()
-    selResKey.sort_values(by='year', ascending=0)
+#     selResKey = data_keywords[data_keywords[column_identifier] == category_select]
+#     selResKey = selResKey.dropna()
+#     selResKey.sort_values(by='year', ascending=0)
 
-    totList = selResKey['keyword'].value_counts()
-    totList = pd.DataFrame(totList).reset_index()
+#     totList = selResKey['keyword'].value_counts()
+#     totList = pd.DataFrame(totList).reset_index()
 
-    st.dataframe(totList)
+#     st.dataframe(totList)
 
     # totChart = alt.Chart(totList[ : 60]).mark_bar(color='lightblue').encode(
     #     x='keyword:Q',
