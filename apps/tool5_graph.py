@@ -2,10 +2,12 @@
 File: tool5_graph.py
 Author: Flemming Skov 
 Purpose: Create a network layour based on the co-occurrence matrix
-Latest version: April 11 2021
+Latest version: May 16 2023
+-- including detetecting of communities and partitions in keywords --
 '''
 
 import igraph as ig
+import louvain
 
 st.header("BASIC GRAPH LAYOUT")
 st.markdown('___')
@@ -48,6 +50,10 @@ with st.expander("Settings and controls ..."):
     max_iter= st.slider('Max number of iterations in graph layout: ', \
             min_value=100, max_value=1500, value=500, step=100, format=None, \
             key='max_iter_slider')
+
+    # resolution_param = st.slider('Resolution parameter: ', \
+    #         min_value=0.5, max_value=2.00, value=1.0, step=0.05, format=None, \
+    #         key='max_iter_slider')
 
     for t in range(expander_space):
         st.write(' ')
@@ -104,6 +110,33 @@ if run_script:
             p_betweenness = g.betweenness()
             p_closeness = g.closeness()
 
+        #  Detecting COMMUNITIES
+            # Multilevel algorithm
+            com_multi = g.community_multilevel(weights=g.es['weight'])
+            com_multi_membership = com_multi.membership
+
+            # Fast-greedy algorithm - k = the desired number of partitions
+            k = 7
+            fast_greedy = g.community_fastgreedy(weights=g.es['weight'])
+            fast_greedy_membership = fast_greedy.as_clustering(k).membership
+
+            # Louvain algorithm
+            louvain_optimizer = louvain.Optimiser()
+            louvain_partition = louvain.ModularityVertexPartition(g)
+
+            improv = 1
+            counter = 1
+            while improv > 0:
+                counter = counter + 1
+                improv = louvain_optimizer.optimise_partition(louvain_partition)
+
+            louvain_membership = louvain_partition.membership
+
+        # Showing metrics
+            st.metric("Number of clusters", g.vcount(), delta=None, delta_color="normal", help=None)
+            st.metric("Number of edges", g.ecount(), delta=None, delta_color="normal", help=None)
+            st.metric("Number of communities", counter, delta=None, delta_color="normal", help=None)
+
         # Creating the layout 
             random.seed(5)
 
@@ -116,7 +149,11 @@ if run_script:
                                                 'ycoor': y_list, 'degree': p_degree,
                                                 'wdegree' : p_weighted_degree,
                                                 'betweenness' : p_betweenness,
-                                                'closeness' : p_closeness})
+                                                'closeness' : p_closeness,
+                                                'com_multi' : com_multi_membership,
+                                                'com_greedy' : fast_greedy_membership,
+                                                'com_louvain' : louvain_membership
+                                                })
 
             keyword_coordinates = keyword_coordinates.sort_values("wdegree", ascending=False)
             keyword_coordinates['distance'] = keyword_coordinates.apply(lambda row: math.hypot(row['xcoor'] \
@@ -130,7 +167,6 @@ if run_script:
 
     except Exception as e:
         print("Program Error: ")
-        print(str(index))
         print(e)
 
     finally:
