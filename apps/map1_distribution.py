@@ -174,14 +174,10 @@ with st.expander("Filters ..."):
         (data_papers['year']<= end_year))]
     data_papers = data_papers.dropna()
 
-
     # import density data by year
     data_shade_points = import_data(overlay_db, data_shade_points_table)
     data_shade_points = data_shade_points[((data_shade_points['year']>= start_year) & \
             (data_shade_points['year']<= end_year))]
-
-    
-
 
     # preparing data
     if category_select != 'All papers':
@@ -193,7 +189,6 @@ with st.expander("Filters ..."):
         selected_category.sort_values(by='year', ascending=0)
         selected_category = selected_category.drop_duplicates(subset='wosid', keep='last')
 
-    
     # showing data (controls which data to show)
     data_to_select = selected_category[['wosid', 'xcoor', 'ycoor', 'year']]
     data_to_inform = data_papers[['wosid', 'title', 'authors', 'cites']]
