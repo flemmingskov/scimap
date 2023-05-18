@@ -6,8 +6,10 @@ Latest version: May 16 2023
 -- including detetecting of communities and partitions in keywords --
 '''
 
+# Import packages for graph and network analyses
 import igraph as ig
 import louvain
+import leidenalg as la
 
 st.header("BASIC GRAPH LAYOUT")
 st.markdown('___')
@@ -110,32 +112,64 @@ if run_script:
             p_betweenness = g.betweenness()
             p_closeness = g.closeness()
 
-        #  Detecting COMMUNITIES
-            # Multilevel algorithm
-            com_multi = g.community_multilevel(weights=g.es['weight'])
-            com_multi_membership = com_multi.membership
+        #  Detecting partitions in the network of connected keywords
 
-            # Fast-greedy algorithm - k = the desired number of partitions
-            k = 7
-            fast_greedy = g.community_fastgreedy(weights=g.es['weight'])
-            fast_greedy_membership = fast_greedy.as_clustering(k).membership
+            # I NON-HIERARCHICAL
+            # fast and scalable algorithm for community detection that optimizes modularity
 
-            # Louvain algorithm
-            louvain_optimizer = louvain.Optimiser()
-            louvain_partition = louvain.ModularityVertexPartition(g)
+            ## Multilevel algorithm (louvain methods)
+            multi_level_partition = g.community_multilevel(weights=g.es['weight'])
+            multi_level_membership = multi_level_partition.membership
+            multi_level_clusters = (len(multi_level_partition))
+            multi_level_modularity = g.modularity(multi_level_membership)
 
-            improv = 1
-            counter = 1
-            while improv > 0:
-                counter = counter + 1
-                improv = louvain_optimizer.optimise_partition(louvain_partition)
+    
+            ## Improved Louvain algorithm (uses louvain package)
+            ## NB: not implemented here (but ready to)
+            # louvain_optimizer = louvain.Optimiser()
+            # louvain_partition = louvain.ModularityVertexPartition(g)
+            # improv = 1
+            # counter = 1
+            # while improv > 0:
+            #     counter = counter + 1
+            #     improv = louvain_optimizer.optimise_partition(louvain_partition)
+            # louvain_membership = louvain_partition.membership
 
-            louvain_membership = louvain_partition.membership
+            ## Improved, improved Louvain method (Leiden algorithm using leidenalg library)
+            leiden_partition = la.find_partition(g, la.ModularityVertexPartition, weights=g.es['weight'])
+            leiden_membership = leiden_partition.membership
+            leiden_clusters = (len(leiden_partition))
+            leiden_modularity = g.modularity(leiden_membership)
+
+            # II HIERARCHICAL (DENDROGRAMS)
+
+            # # NOT USED (very time consuming) The Girvan-Newman algorithm, also known as the edge-betweenness
+            # algorithm, is based on the concept of edge-betweenness centrality
+            # gn_partition = g.community_edge_betweenness()
+            # gn_membership = gn_partition.as_clustering().membership
+
+
+            # Fast-greedy algorithm. It starts with each node in its own community 
+            # and iteratively merges communities based on the increase in modularity 
+            # achieved by the merger (k = the desired number of partitions)
+            k = 10
+            fast_greedy_partition = g.community_fastgreedy(weights=g.es['weight'])
+            fast_greedy_membership = fast_greedy_partition.as_clustering().membership
+            fast_greedy_clusters = (len(fast_greedy_partition.as_clustering()))
+            fast_greedy_modularity = g.modularity(fast_greedy_membership)
+
 
         # Showing metrics
-            st.metric("Number of clusters", g.vcount(), delta=None, delta_color="normal", help=None)
-            st.metric("Number of edges", g.ecount(), delta=None, delta_color="normal", help=None)
-            st.metric("Number of communities", counter, delta=None, delta_color="normal", help=None)
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Number of nodes in graph", g.vcount(), delta=None, delta_color="normal", help=None)
+            col2.metric("Number of edges", g.ecount(), delta=None, delta_color="normal", help=None)
+            col1.metric("Clusters in multi-level", multi_level_clusters)
+            col2.metric("Modularity for multi-level", multi_level_modularity)
+            col1.metric("Clusters in leiden", leiden_clusters)
+            col2.metric("Modularity for leiden", leiden_modularity)
+            col1.metric("Clusters in fast-greedy", fast_greedy_clusters)
+            col2.metric("Modularity for fast-greedy", fast_greedy_modularity)
+
 
         # Creating the layout 
             random.seed(5)
@@ -150,9 +184,9 @@ if run_script:
                                                 'wdegree' : p_weighted_degree,
                                                 'betweenness' : p_betweenness,
                                                 'closeness' : p_closeness,
-                                                'com_multi' : com_multi_membership,
-                                                'com_greedy' : fast_greedy_membership,
-                                                'com_louvain' : louvain_membership
+                                                'multi_level' : multi_level_membership,
+                                                'fast_greedy' : fast_greedy_membership,
+                                                'leiden' : leiden_membership
                                                 })
 
             keyword_coordinates = keyword_coordinates.sort_values("wdegree", ascending=False)

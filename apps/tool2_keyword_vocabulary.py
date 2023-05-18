@@ -98,8 +98,7 @@ if run_script:
             ## LIST of keywords to erase from vocabulary
             # for delete_kw in ['biogeography', 'pattern', 'north', 'northern', 'south', 'southern', 
             #                     'east', 'eastern', 'west', 'western']:
-            for delete_kw in ['dynamic', 'impact', 'response', 'trend', 'consequence', 'success', 'north', 'northern', 'south', 'southern', 
-                                'east', 'eastern', 'west', 'western']:
+            for delete_kw in ['response', 'performance', 'system', 'physiology', 'dynamic', 'consequence', 'increase']:
                 keyword_count.drop(keyword_count.loc[keyword_count['keyword']==delete_kw].index, inplace=True)
                 
             keyword_count = keyword_count.reset_index(drop=True)
