@@ -167,9 +167,15 @@ if run_script:
             nodes.to_csv(node_file, sep=',', index=False, header=False)
             edges_new.to_csv(edge_file, sep=',', index=False, header=False)
 
-            node_count = len(nodes)
-            edge_count = len(edges_new)
-            st.markdown(f"""Total number of nodes is {node_count} with {edge_count} edges.""")         
+
+            # Showing metrics
+            col1, col2 = st.columns(2)
+            col1.metric("Number of nodes", len(nodes))
+            col2.metric("Number of edges", len(edges_new))
+
+            # node_count = len(nodes)
+            # edge_count = len(edges_new)
+            # st.markdown(f"""Total number of nodes is {node_count} with {edge_count} edges.""")         
 
     except Exception as e:
         print("Program Error: ")

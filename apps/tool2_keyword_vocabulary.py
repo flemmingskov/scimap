@@ -103,13 +103,31 @@ if run_script:
                 
             keyword_count = keyword_count.reset_index(drop=True)
             total_count = len(keyword_count)
-            ones = total_count - len(keyword_count[keyword_count['keyword_count'] == 1])
-            twos = total_count - len(keyword_count[keyword_count['keyword_count'] <= 2])
+            one = total_count - len(keyword_count[keyword_count['keyword_count'] == 1])
+            two = total_count - len(keyword_count[keyword_count['keyword_count'] <= 2])
+            three = total_count - len(keyword_count[keyword_count['keyword_count'] <= 3])
+            four = total_count - len(keyword_count[keyword_count['keyword_count'] <= 5])
+            five = total_count - len(keyword_count[keyword_count['keyword_count'] <= 9])
+            six = total_count - len(keyword_count[keyword_count['keyword_count'] <= 14])
+            seven = total_count - len(keyword_count[keyword_count['keyword_count'] <= 19])
+            eight = total_count - len(keyword_count[keyword_count['keyword_count'] <= 24])
 
-            st.markdown(
-            f"""Total number of keywords is {total_count}. Number of keywords with two or 
-            more occurrences: {ones}. Number of keywords with three or 
-            more occurrences: {twos}""") 
+            # st.markdown(
+            # f"""Total number of keywords is {total_count}. Number of keywords with two or 
+            # more occurrences: {ones}. Number of keywords with three or 
+            # more occurrences: {twos}""") 
+
+            # Showing metrics
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total number of keywords", total_count)
+            col2.metric(">= 2 occurrences", one)
+            col3.metric(">= 3 occurrences", two)
+            col1.metric(">= 4 occurrences", three)
+            col2.metric(">= 5 occurrences", four)
+            col3.metric(">= 10 occurrences", five)
+            col1.metric(">= 15 occurrences", six)
+            col2.metric(">= 20 occurrences", seven)
+            col3.metric(">= 25 occurrences", eight)
 
             st.dataframe(keyword_count)
 
