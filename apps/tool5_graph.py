@@ -8,7 +8,6 @@ Latest version: May 16 2023
 
 # Import packages for graph and network analyses
 import igraph as ig
-#import louvain
 import leidenalg as la
 
 st.header("BASIC GRAPH LAYOUT")
@@ -25,8 +24,7 @@ with st.expander("About ..."):
         Run Graph Layout using the 'Fruchtermann-Rheingold' algorithm in iGraph  
     """)
 
-    for t in range(expander_space):
-        st.write(' ')
+    add_empty_lines(expander_space)
 
 # WORKSPACE & FILE EXPANDER
 with st.expander("Workspace and data bases ..."):
@@ -43,9 +41,8 @@ with st.expander("Workspace and data bases ..."):
     nodeFile = my_workspace + 'nodes.csv'
     edgeFile = my_workspace + 'edges.csv'
 
-    for t in range(expander_space):
-        st.write(' ')
-
+    add_empty_lines(expander_space)
+    
 # SETTINGS EXPANDER
 with st.expander("Settings and controls ..."):
     
@@ -53,12 +50,7 @@ with st.expander("Settings and controls ..."):
             min_value=100, max_value=1500, value=500, step=100, format=None, \
             key='max_iter_slider')
 
-    # resolution_param = st.slider('Resolution parameter: ', \
-    #         min_value=0.5, max_value=2.00, value=1.0, step=0.05, format=None, \
-    #         key='max_iter_slider')
-
-    for t in range(expander_space):
-        st.write(' ')
+add_empty_lines(expander_space)
 
 ##  MAIN ACTION
 st.markdown(' ')
@@ -69,6 +61,7 @@ run_script =  st.button('Run script')
 if run_script:
     begin_time = datetime.datetime.now()
 
+    # open sql3 database connection
     conn = sqlite3.connect(data_depository)
 
     try:
@@ -113,27 +106,13 @@ if run_script:
             p_closeness = g.closeness()
 
         #  Detecting partitions in the network of connected keywords
-
             # I NON-HIERARCHICAL
-            # fast and scalable algorithm for community detection that optimizes modularity
-
+ 
             ## Multilevel algorithm (louvain methods)
             multi_level_partition = g.community_multilevel(weights=g.es['weight'])
             multi_level_membership = multi_level_partition.membership
             multi_level_clusters = (len(multi_level_partition))
             multi_level_modularity = g.modularity(multi_level_membership)
-
-    
-            ## Improved Louvain algorithm (uses louvain package)
-            ## NB: not implemented here (but ready to)
-            # louvain_optimizer = louvain.Optimiser()
-            # louvain_partition = louvain.ModularityVertexPartition(g)
-            # improv = 1
-            # counter = 1
-            # while improv > 0:
-            #     counter = counter + 1
-            #     improv = louvain_optimizer.optimise_partition(louvain_partition)
-            # louvain_membership = louvain_partition.membership
 
             ## Improved, improved Louvain method (Leiden algorithm using leidenalg library)
             leiden_partition = la.find_partition(g, la.ModularityVertexPartition, weights=g.es['weight'])
@@ -141,23 +120,11 @@ if run_script:
             leiden_clusters = (len(leiden_partition))
             leiden_modularity = g.modularity(leiden_membership)
 
-            # II HIERARCHICAL (DENDROGRAMS)
-
-            # # NOT USED (very time consuming) The Girvan-Newman algorithm, also known as the edge-betweenness
-            # algorithm, is based on the concept of edge-betweenness centrality
-            # gn_partition = g.community_edge_betweenness()
-            # gn_membership = gn_partition.as_clustering().membership
-
-
-            # Fast-greedy algorithm. It starts with each node in its own community 
-            # and iteratively merges communities based on the increase in modularity 
-            # achieved by the merger (k = the desired number of partitions)
-            k = 10
+            #k = 10
             fast_greedy_partition = g.community_fastgreedy(weights=g.es['weight'])
             fast_greedy_membership = fast_greedy_partition.as_clustering().membership
             fast_greedy_clusters = (len(fast_greedy_partition.as_clustering()))
             fast_greedy_modularity = g.modularity(fast_greedy_membership)
-
 
         # Showing metrics
             col1, col2, col3 = st.columns(3)
@@ -197,7 +164,6 @@ if run_script:
                 
             keyword_coordinates.to_sql('keyword_raw_coordinates', conn, if_exists='replace')
             conn.close()   
-
 
     except Exception as e:
         print("Program Error: ")

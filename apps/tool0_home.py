@@ -6,7 +6,7 @@ and important and required data files and folder structure
 Latest version: April 11 2021
 '''
 
-st.header("SCIENCE MAPPING: HOME")
+st.header("Science Mapping Home - rebuild version")
 st.markdown('___')
 
 exec(open("config.py").read())  # file with stored basic information - must be updated for a new project

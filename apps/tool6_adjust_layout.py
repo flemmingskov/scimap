@@ -5,7 +5,6 @@ Purpose: This script makes it possible to adjust the graph
 Latest version: May 22 2021
 '''
 
-
 st.header("ADJUST GRAPH LAYOUT")
 st.markdown('___')
 st.subheader('CONTROLS & SETTINGS')
@@ -24,8 +23,7 @@ with st.expander("About ..."):
         and normalize to new values. The x- and y-adjust values simply move the center of the graph.  
     """)
 
-    for t in range(expander_space):
-        st.write(' ')
+    add_empty_lines(expander_space)
 
 # WORKSPACE & FILE EXPANDER
 with st.expander("Workspace and data bases ..."):
@@ -39,9 +37,7 @@ with st.expander("Workspace and data bases ..."):
     coordinates_db = my_workspace + st.text_input('data base: ', default_coordinates_db)
     st.success("db found: " + coordinates_db) if os.path.isfile(coordinates_db) else st.info("db does not exist")
 
-    for t in range(expander_space):
-        st.write(' ')
-
+    add_empty_lines(expander_space)
 
 # Setting basic variables
 conn = sqlite3.connect(coordinates_db) 
@@ -106,11 +102,9 @@ with st.expander("Adjustment settings  ..."):
     x_adjust = st.slider('Adjust x-value:', -0.2, 0.2, 0.0, 0.01, key='adjustX')
     y_adjust = st.slider('Adjust y-value:', -0.2, 0.2, 0.0, 0.01, key='adjustY')
 
-
     run_save_coord =  st.checkbox('Save adjusted coordinates while running', value=False, key='save_new_coordinates')
 
-    for t in range(expander_space):
-        st.write(' ')
+    add_empty_lines(expander_space)
 
 # EXPANDED DATA
 run_FR_adjust =  st.checkbox('Show adjusted layout', value=False,  key='runFRexp')

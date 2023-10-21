@@ -58,19 +58,24 @@ st.write(' ')
 run_script =  st.button('Run script')
 
 if run_script:
-    begin_time = datetime.datetime.now()
+    
+    try: 
+        begin_time = datetime.datetime.now()
 
-    conn = sqlite3.connect(data_depository)
-    dataIn = pd.read_sql_query('select * from keyword_collection;', conn).fillna('')
-    dataIn = dataIn[dataIn['kw_title'] != '']
-    kwCount = pd.read_sql_query('select * from vocabulary', conn)
-    conn.close()
+        # Read data from the 'keyword_collection' table, filtering out rows with empty 'kw_title'
+        with sqlite3.connect(data_depository) as conn:
+            dataframe_input = pd.read_sql_query('SELECT * FROM keyword_collection WHERE kw_title <> ""', conn).fillna('')
+            # Read data from the 'vocabulary' table
+            keyword_count = pd.read_sql_query('SELECT * FROM vocabulary', conn)
 
+    except sqlite3.Error as e:
+        print("SQLite Error:", e)
+        
     try:
         with st.spinner('Processing node and edge files ...'):
-            combList = []
+            combined_list = []
 
-            for index, row in dataIn.iterrows():
+            for index, row in dataframe_input.iterrows():
                 keyword_str = ''       
                 if row[2] != '':
                     keyword_str = row[2] + ';' +  row[3]
@@ -84,52 +89,53 @@ if run_script:
 
                 keyword_list = list(keyword_str.split(";"))
                 keyword_list = list(set(keyword_list))
-                combList.append(list(itertools.combinations(keyword_list, 2)))
+                combined_list.append(list(itertools.combinations(keyword_list, 2)))
 
-            focusList = []
-            targetList = []
-            for P in combList:
+
+            focus_list = []
+            target_list = []
+            for P in combined_list:
                 for K in P:
-                    focusList.append(K[0])
-                    targetList.append(K[1])
+                    focus_list.append(K[0])
+                    target_list.append(K[1])
 
-            dfStep2 = pd.DataFrame({'focus': focusList, 'target': targetList})
+            dataframe_intermediate = pd.DataFrame({'focus': focus_list, 'target': target_list})
 
-            dfStep2 = pd.merge(dfStep2, kwCount, left_on='focus', right_on='keyword', how='left')
-            dfStep2 = dfStep2[['focus', 'target', 'keyword_count']]
-            dfStep2.columns = ["focus", "target", "focus_num"]
+            dataframe_intermediate = pd.merge(dataframe_intermediate, keyword_count, left_on='focus', right_on='keyword', how='left')
+            dataframe_intermediate = dataframe_intermediate[['focus', 'target', 'keyword_count']]
+            dataframe_intermediate.columns = ["focus", "target", "focus_num"]
 
-            dfStep2 = pd.merge(dfStep2, kwCount, left_on='target', right_on='keyword', how='left')
-            dfStep2 = dfStep2[['focus', 'target', 'focus_num', 'keyword_count']]
-            dfStep2.columns = ["focus", "target", "focus_num", "target_num"]       
+            dataframe_intermediate = pd.merge(dataframe_intermediate, keyword_count, left_on='target', right_on='keyword', how='left')
+            dataframe_intermediate = dataframe_intermediate[['focus', 'target', 'focus_num', 'keyword_count']]
+            dataframe_intermediate.columns = ["focus", "target", "focus_num", "target_num"]       
             
-            dfStep2 = dfStep2.loc[(dfStep2['focus_num'] >= low_cut) & (dfStep2['target_num'] >= low_cut)]
-            dfStep2.reset_index(inplace = True, drop = True)
+            dataframe_intermediate = dataframe_intermediate.loc[(dataframe_intermediate['focus_num'] >= low_cut) & (dataframe_intermediate['target_num'] >= low_cut)]
+            dataframe_intermediate.reset_index(inplace = True, drop = True)
 
-            dfStep2 = dfStep2.dropna()[['focus', 'target']]
+            dataframe_intermediate = dataframe_intermediate.dropna()[['focus', 'target']]
 
-            dataRaw = ''
-            dataA1 = ''
+            dataframe_raw = ''
+            dataframe_A1 = ''
 
-            dataA1 = dfStep2.iloc[:]
-            dataA1.columns = ['kw1', 'kw2']
+            dataframe_A1 = dataframe_intermediate.iloc[:]
+            dataframe_A1.columns = ['kw1', 'kw2']
 
-            dataA1L = dataA1['kw1']
-            dataA1L.columns = ['kw']
-            dataA1R = dataA1['kw2']
-            dataA1R.columns = ['kw']
-            dataStack = pd.concat([dataA1L, dataA1R], axis=0)
-            dataStack = pd.DataFrame(dataStack)
-            dataStack.columns = ['kw']
+            dataframe_A1L = dataframe_A1['kw1']
+            dataframe_A1L.columns = ['kw']
+            dataframe_A1R = dataframe_A1['kw2']
+            dataframe_A1R.columns = ['kw']
+            dataframe_stacked = pd.concat([dataframe_A1L, dataframe_A1R], axis=0)
+            dataframe_stacked = pd.DataFrame(dataframe_stacked)
+            dataframe_stacked.columns = ['kw']
 
-            uniqs = pd.unique(dataStack.kw.ravel())
+            uniqs = pd.unique(dataframe_stacked.kw.ravel())
 
             nodes = pd.DataFrame(uniqs)
             nodes.columns = ['label']
             nodes['ID'] = nodes.index + 1
             nodes = nodes[["ID", "label"]]
 
-            edges = pd.merge(left=dataA1, right=nodes, how='left', left_on='kw1',
+            edges = pd.merge(left=dataframe_A1, right=nodes, how='left', left_on='kw1',
                             right_on='label')
             edges = pd.merge(left=edges, right=nodes, how='left', left_on='kw2',
                             right_on='label')
@@ -172,10 +178,6 @@ if run_script:
             col1, col2 = st.columns(2)
             col1.metric("Number of nodes", len(nodes))
             col2.metric("Number of edges", len(edges_new))
-
-            # node_count = len(nodes)
-            # edge_count = len(edges_new)
-            # st.markdown(f"""Total number of nodes is {node_count} with {edge_count} edges.""")         
 
     except Exception as e:
         print("Program Error: ")

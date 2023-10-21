@@ -4,7 +4,6 @@ Author: Flemming Skov
 Purpose: This script produced a map database where keyword coordinates from the reference map
         may be added to any data file   
 Latest version: May 22 2021
-
 '''
 
 st.header("PREPARE DATA FOR MAPPING")
@@ -23,8 +22,7 @@ with st.expander("About ..."):
         again used as input to the mapping tools  
     """)
 
-    for t in range(expander_space):
-        st.write(' ')
+    add_empty_lines(expander_space)
 
 # WORKSPACE & FILE EXPANDER
 with st.expander("Workspace and data bases ..."):
@@ -51,8 +49,7 @@ with st.expander("Workspace and data bases ..."):
     st.success("db found: " + output_data_path) if os.path.isfile(output_data_path) \
         else st.info("db does not exist")
 
-    for t in range(expander_space):
-        st.write(' ')
+    add_empty_lines(expander_space)
 
 # SETTINGS EXPANDER
 with st.expander("Settings and controls ..."):   
@@ -65,8 +62,7 @@ with st.expander("Settings and controls ..."):
      "Calculate position of papers using:",
      ('mean', 'median'))
 
-    for t in range(expander_space):
-        st.write(' ')
+    add_empty_lines(expander_space)
 
 ##  MAIN ACTION
 st.markdown(' ')
@@ -75,6 +71,7 @@ st.write(' ')
 run_script =  st.button('Run script')
 
 if run_script:
+    synonyms = import_synonyms()
     begin_time = datetime.datetime.now()
 
     try:
@@ -94,14 +91,14 @@ if run_script:
 
             search_string = '(overlay_links.cites >= 0)'
             subset = overlay_links.loc[eval(search_string), ['wosid', 'label']]
-            dataIn = pd.merge(subset, overlay_data, on='wosid', how='inner')
-            dataIn = dataIn.drop_duplicates(['wosid'])
-            dataIn = dataIn.dropna()
-            dataIn = dataIn[['authors', 'title', 'kw1', 'kw2', 'abstr', 'inst',
+            dataframe_in = pd.merge(subset, overlay_data, on='wosid', how='inner')
+            dataframe_in = dataframe_in.drop_duplicates(['wosid'])
+            dataframe_in = dataframe_in.dropna()
+            dataframe_in = dataframe_in[['authors', 'title', 'kw1', 'kw2', 'abstr', 'inst',
                             'email', 'autID', 'funding', 'cites', 'journal', 'year',
                             'wos_sub_cat1', 'wos_sub_cat2', 'wosid', 'time_stamp']]
 
-            wosCat = overlay_links.loc[eval(search_string), ['wosid', 'category']]
+            WoS_category = overlay_links.loc[eval(search_string), ['wosid', 'category']]
             del overlay_data           
 
         # STEP 1 - linking individual keywords to papers
@@ -152,18 +149,20 @@ if run_script:
 
             keywords_df = pd.DataFrame({'keyword': kw_list, 'year': year_list, 'wosid': wos_list})    
 
-
         # STEP 2 - linking individual institutions and countries to papers
-            wosList = []
-            citesList = []
-            instList = []
-            countryList = []
-            collList = []
+            # wosList = []
+            # citesList = []
+            # instList = []
+            # countryList = []
+            # collList = []
+            
+            wosList, citesList, instList, countryList, collList = ([] for _ in range(5))
+            
             sqRegex = re.compile(r'\[.*?\]\s')
-            usRegex =re.compile(r'(\D\D)\s(\d\d\d\d\d)\s(usa)')           
+            usRegex = re.compile(r'(\D\D)\s(\d\d\d\d\d)\s(usa)')           
         
-            # for index, row in dataIn.iterrows():
-            for row in dataIn.itertuples(index=False):
+            # for index, row in dataframe_in.iterrows():
+            for row in dataframe_in.itertuples(index=False):
 
                 wosid = row[14]
                 cites = row[9]
@@ -214,19 +213,19 @@ if run_script:
         # STEP 3 - pivot to find median x- and y-coords per WoS record
             mergeWoSCoord = keywords_df.merge(coordinates_data, on='keyword', how='left')
 
-            wosCoordPivot = pd.pivot_table(mergeWoSCoord, index=['wosid'],
+            WoS_pivot_coord = pd.pivot_table(mergeWoSCoord, index=['wosid'],
                                         values=['xcoor', 'ycoor', 'year'],
                                         aggfunc=calculation_mode)  #np.sum
                          
 
-            wosCoordPivot = wosCoordPivot[['xcoor', 'ycoor', 'year']].iloc[1:]
-            wosCoordPivot.reset_index(inplace=True)
+            WoS_pivot_coord = WoS_pivot_coord[['xcoor', 'ycoor', 'year']].iloc[1:]
+            WoS_pivot_coord.reset_index(inplace=True)
 
-            wosCoor = wosCoordPivot.merge(subset, on='wosid', how='left')
+            wosCoor = WoS_pivot_coord.merge(subset, on='wosid', how='left')
             wosCoor = wosCoor.drop_duplicates(['wosid'])
             
-            #  CHANGE APRIL 15 2023 (original):  dataInCites = dataIn[['wosid', 'cites', 'authors', 'title', ]]
-            dataInCites = dataIn[['wosid', 'cites', 'authors', 'title', 'journal' ]]
+            #  CHANGE APRIL 15 2023 (original):  dataInCites = dataframe_in[['wosid', 'cites', 'authors', 'title', ]]
+            dataInCites = dataframe_in[['wosid', 'cites', 'authors', 'title', 'journal' ]]
         
             dataInCites = dataInCites.sort_values(['cites'], ascending=[0])
             dataInCites.insert(0, 'rank', range(1, len(dataInCites)+1))
@@ -247,28 +246,28 @@ if run_script:
             df_keywords_with_coor.to_sql('papK', outputdata_db_connection, if_exists='replace')
             
         # STEP 4 - calculating coordinates for WoS subject categories
-            mergeCatCoord = pd.merge(wosCat, wosCoordPivot, on='wosid', how='left')          
+            mergeCatCoord = pd.merge(WoS_category, WoS_pivot_coord, on='wosid', how='left')          
             mergeCatCoord = mergeCatCoord[['wosid', 'category', 'xcoor', 'ycoor',
                     'year']]
             
-            wosCatPivot = pd.pivot_table(mergeCatCoord, index=['category'],
+            WoS_pivot_category = pd.pivot_table(mergeCatCoord, index=['category'],
                             values=['xcoor', 'ycoor'],
                             aggfunc=calculation_mode)
-            wosCatPivot.reset_index(inplace=True)
+            WoS_pivot_category.reset_index(inplace=True)
             
             # Counting unique occurrences of subject categories
-            catCount = pd.DataFrame(wosCat['category'].value_counts())  
+            catCount = pd.DataFrame(WoS_category['category'].value_counts())  
             catCount['label'] = catCount.index
             catCount.index = range(len(catCount))
             catCount.columns = ["numOcc", "category"]
             catCount = catCount[["category", "numOcc"]]
             
             # Centroids for each WoS category
-            wosCatPivot = wosCatPivot.merge(catCount, on='category', how='left')
-            wosCatPivot = wosCatPivot.dropna()
-            wosCatPivot = wosCatPivot.sort_values('numOcc', ascending=False)
-            #wosCatPivot = wosCatPivot.drop('year', axis=1)
-            wosCatPivotW = wosCatPivot
+            WoS_pivot_category = WoS_pivot_category.merge(catCount, on='category', how='left')
+            WoS_pivot_category = WoS_pivot_category.dropna()
+            WoS_pivot_category = WoS_pivot_category.sort_values('numOcc', ascending=False)
+            #WoS_pivot_category = WoS_pivot_category.drop('year', axis=1)
+            wosCatPivotW = WoS_pivot_category
             wosCatPivotW.columns = ['category', 'xcoor','ycoor', 'weight']
             wosCatPivotW.to_sql('catC', outputdata_db_connection, if_exists='replace')
             
@@ -288,69 +287,69 @@ if run_script:
             catKmerge.to_sql('catK', outputdata_db_connection, if_exists='replace')    
         
         # STEP 5 - finding mean coordinates and sum cites for countries      
-            instMerge = pd.merge(dfStep2, wosCoordPivot, on='wosid', how='left')
+            instMerge = pd.merge(dfStep2, WoS_pivot_coord, on='wosid', how='left')
             
             ##  mean coordinates
-            countPivotCoor = pd.pivot_table(instMerge, index=['country'],
+            country_pivot_coor = pd.pivot_table(instMerge, index=['country'],
                                         values=['xcoor', 'ycoor'],
                                         aggfunc=calculation_mode)
-            countPivotCoor = countPivotCoor[['xcoor', 'ycoor']].iloc[1:]
-            countPivotCoor.reset_index(inplace=True)
+            country_pivot_coor = country_pivot_coor[['xcoor', 'ycoor']].iloc[1:]
+            country_pivot_coor.reset_index(inplace=True)
 
             ##  sum cites
-            countPivotCites = pd.pivot_table(instMerge, index=['country'],
+            country_pivot_cites = pd.pivot_table(instMerge, index=['country'],
                                         values=['cites'],
                                         aggfunc='sum')
-            countPivotCites = countPivotCites[['cites']].iloc[1:]
-            countPivotCites.reset_index(inplace=True)
+            country_pivot_cites = country_pivot_cites[['cites']].iloc[1:]
+            country_pivot_cites.reset_index(inplace=True)
             
 
             ## number of authorships per institute
-            countPivotCount = pd.DataFrame(dfStep2['country'].value_counts())
+            counttry_pivot_count = pd.DataFrame(dfStep2['country'].value_counts())
             
-            countPivotCount['label'] = countPivotCount.index
-            countPivotCount.index = range(len(countPivotCount))
-            countPivotCount.columns = ["numOcc", "country"]
-            countPivotCount = countPivotCount[["country", "numOcc"]]
+            counttry_pivot_count['label'] = counttry_pivot_count.index
+            counttry_pivot_count.index = range(len(counttry_pivot_count))
+            counttry_pivot_count.columns = ["numOcc", "country"]
+            counttry_pivot_count = counttry_pivot_count[["country", "numOcc"]]
             
             ##  merging tables
-            countPivotCoor = countPivotCoor.merge(countPivotCites, on='country', how='left')
-            countPivotCoor = countPivotCoor.merge(countPivotCount, on='country', how='left')
-            countPivotCoor.columns = ['country', 'xcoor','ycoor', 'cites', 'weight']
-            countPivotCoor.to_sql('couC', outputdata_db_connection, if_exists='replace')
+            country_pivot_coor = country_pivot_coor.merge(country_pivot_cites, on='country', how='left')
+            country_pivot_coor = country_pivot_coor.merge(counttry_pivot_count, on='country', how='left')
+            country_pivot_coor.columns = ['country', 'xcoor','ycoor', 'cites', 'weight']
+            country_pivot_coor.to_sql('couC', outputdata_db_connection, if_exists='replace')
             
         # STEP 6 - putting coordinates on institutions
             ##  mean coordinates
 
-            instPivotCoor = pd.pivot_table(instMerge, index=['institution'],
+            institution_pivot_coor = pd.pivot_table(instMerge, index=['institution'],
                                         values=['xcoor', 'ycoor'],
                                         aggfunc=calculation_mode)
-            instPivotCoor = instPivotCoor[['xcoor', 'ycoor']].iloc[1:]
-            instPivotCoor.reset_index(inplace=True)
+            institution_pivot_coor = institution_pivot_coor[['xcoor', 'ycoor']].iloc[1:]
+            institution_pivot_coor.reset_index(inplace=True)
 
             ##  sum cites
-            instPivotCites = pd.pivot_table(instMerge, index=['institution'],
+            institution_pivot_cites = pd.pivot_table(instMerge, index=['institution'],
                                         values=['cites'],
                                         aggfunc='sum')
-            instPivotCites = instPivotCites[['cites']].iloc[1:]
-            instPivotCites.reset_index(inplace=True)
+            institution_pivot_cites = institution_pivot_cites[['cites']].iloc[1:]
+            institution_pivot_cites.reset_index(inplace=True)
 
             ## number of authorships per institute
-            instPivotCount = pd.DataFrame(dfStep2['institution'].value_counts())
-            instPivotCount['label'] = instPivotCount.index
-            instPivotCount.index = range(len(instPivotCount))
-            instPivotCount.columns = ["numOcc", "institution"]
-            instPivotCount = instPivotCount[["institution", "numOcc"]]
+            institution_pivot_count = pd.DataFrame(dfStep2['institution'].value_counts())
+            institution_pivot_count['label'] = institution_pivot_count.index
+            institution_pivot_count.index = range(len(institution_pivot_count))
+            institution_pivot_count.columns = ["numOcc", "institution"]
+            institution_pivot_count = institution_pivot_count[["institution", "numOcc"]]
 
             ##  merging tables
-            instPivotCoor = instPivotCoor.merge(instPivotCites, on='institution', how='left')
-            instPivotCoor = instPivotCoor.merge(instPivotCount, on='institution', how='left')
-            instPivotCoor['ID'] = instPivotCoor.index
-            instPivotCoor = instPivotCoor[['ID', 'institution', 'xcoor', 'ycoor', 'cites', 'numOcc']]
-            instPivotCoor.columns = ['ID', 'inst', 'xcoor', 'ycoor', 'cites', 'weight'] 
+            institution_pivot_coor = institution_pivot_coor.merge(institution_pivot_cites, on='institution', how='left')
+            institution_pivot_coor = institution_pivot_coor.merge(institution_pivot_count, on='institution', how='left')
+            institution_pivot_coor['ID'] = institution_pivot_coor.index
+            institution_pivot_coor = institution_pivot_coor[['ID', 'institution', 'xcoor', 'ycoor', 'cites', 'numOcc']]
+            institution_pivot_coor.columns = ['ID', 'inst', 'xcoor', 'ycoor', 'cites', 'weight'] 
 
             ## save to excel file (NB: Dec17 also write instMerge to file)
-            instPivotCoor.to_sql('insC', outputdata_db_connection, if_exists='replace')
+            institution_pivot_coor.to_sql('insC', outputdata_db_connection, if_exists='replace')
             
             instMerge.columns = ['wosid', 'country', 'cites', 'inst', 'xcoor', 'ycoor', 'year']
             instMerge.to_sql('insD', outputdata_db_connection, if_exists='replace')
@@ -358,9 +357,9 @@ if run_script:
             print('... step 7 - preparation of map, first steps in: ' + str(datetime.datetime.now() - begin_time))
 
         # STEP 7 - putting coordinates on people
-            autWos = dataIn
-            autWos.replace(r'\s+', np.nan, regex=True).replace('', np.nan)
-            autWos = autWos.fillna('')
+            author_WoS = dataframe_in
+            author_WoS.replace(r'\s+', np.nan, regex=True).replace('', np.nan)
+            author_WoS = author_WoS.fillna('')
 
             wosList = []
             autList = []
@@ -368,8 +367,8 @@ if run_script:
             kw1List = []
             kw2List = []
 
-            #for index, row in dataIn.iterrows():
-            for row in dataIn.itertuples(index=False):
+            #for index, row in dataframe_in.iterrows():
+            for row in dataframe_in.itertuples(index=False):
                 au = row[0]
                 wosid = row[14]
                 yr = row[11]
@@ -397,11 +396,10 @@ if run_script:
                                     if (synonyms.get(coll_kw, "none")) != 'none':
                                         coll_kw = synonyms.get(coll_kw)
 
-                            individual = individual.lower()
-                            individual = individual.lstrip()
-                            individual = individual.replace(", ", ".")
-
-                            if (synonyms.get(individual, "none")) != 'none':
+                            individual = individual.lower().strip().replace(", ", ".")
+                            
+                            #if (synonyms.get(individual, "none")) != 'none':
+                            if individual in synonyms:
                                 individual = synonyms.get(individual)
 
                             wosList.append(wosid)
@@ -427,10 +425,8 @@ if run_script:
                                     if (synonyms.get(coll_kw, "none")) != 'none':
                                         coll_kw = synonyms.get(coll_kw)
                                         
-                            individual = individual.lower()
-                            individual = individual.lstrip()
-                            individual = individual.replace(", ", ".")
-
+                            individual = individual.lower().strip().replace(", ", ".")
+                            
                             if (synonyms.get(individual, "none")) != 'none':
                                 individual = synonyms.get(individual)
 
@@ -439,75 +435,66 @@ if run_script:
                             autList.append(individual)
                             kw2List.append(coll_kw)
 
-            autWos = pd.DataFrame({'author': autList, 'wosid': wosList,
+            author_WoS = pd.DataFrame({'author': autList, 'wosid': wosList,
                                     'year': yearList, 'keyword': kw2List})
-            autWos = autWos[2:]
-            autWos = autWos[['author', 'year', 'keyword', 'wosid']]
-            autWos = autWos.fillna('')
-            autMerge = pd.merge(autWos, wosCoordPivot, on='wosid', how='left')
+            author_WoS = author_WoS[2:]
+            author_WoS = author_WoS[['author', 'year', 'keyword', 'wosid']]
+            author_WoS = author_WoS.fillna('')
+            author_merge = pd.merge(author_WoS, WoS_pivot_coord, on='wosid', how='left')
             
         #   prepare data for the autD db where author-wosid are linked    
-            autMergeD = autMerge[["author", "xcoor", "ycoor", "wosid", "year_y"]]
+            autMergeD = author_merge[["author", "xcoor", "ycoor", "wosid", "year_y"]]
             autMergeDNoDup = autMergeD.drop_duplicates(['author', 'wosid'])
             autMergeDNoDup.columns = ['name', 'xcoor', 'ycoor', 'wosid', 'year']
             autMergeDNoDup.to_sql('autD', outputdata_db_connection, if_exists='replace')
             
         #   prepare data for the autK db where all author-keyword relations are shown
-            autMergeK = autMerge[["author", "xcoor", "ycoor", "wosid", "keyword","year_y"]]
+            autMergeK = author_merge[["author", "xcoor", "ycoor", "wosid", "keyword","year_y"]]
             autMergeK.columns = ['name', 'xcoor', 'ycoor', 'wosid', 'keyword', 'year']
             autMergeK.to_sql('autK', outputdata_db_connection, if_exists='replace')
             
-            autPivotCoord = pd.pivot_table(autMerge, index=['author'],
+            author_pivot_coord = pd.pivot_table(author_merge, index=['author'],
                     values=['xcoor', 'ycoor'],
                     aggfunc=calculation_mode)
-            
-            st.dataframe(autPivotCoord)
-            
-            autPivotCoord.reset_index(inplace=True)
-            autPivotCoord = autPivotCoord.dropna()
+
+            author_pivot_coord.reset_index(inplace=True)
+            author_pivot_coord = author_pivot_coord.dropna()
             
             # Counting unique occurrences and adding IDs
-            autCount = pd.DataFrame(autWos['author'].value_counts())
-            autCount['label'] = autCount.index
-            autCount.index = range(len(autCount))
-            autCount.columns = ["numOcc", "author"]
-            autCount = autCount[["author", "numOcc"]]
-            autPivotCoord = autPivotCoord.merge(autCount, on='author', how='left')
-            autPivotCoord = autPivotCoord.sort_values('numOcc', ascending=False)
-            autPivotCoord['ID'] = autPivotCoord.index
-            autPivotCoord = autPivotCoord[['ID', 'author', 'xcoor', 'ycoor', 'numOcc']]
-            autPivotCoord.columns = ['ID', 'name', 'xcoor', 'ycoor', 'weight'] 
-            autPivotCoord.to_sql('autC', outputdata_db_connection, if_exists='replace')
-
-        #### NEW PROGRAMMING!!  April 15, 2023
-
+            number_of_authors = pd.DataFrame(author_WoS['author'].value_counts())
+            number_of_authors['label'] = number_of_authors.index
+            number_of_authors.index = range(len(number_of_authors))
+            number_of_authors.columns = ["numOcc", "author"]
+            number_of_authors = number_of_authors[["author", "numOcc"]]
+            author_pivot_coord = author_pivot_coord.merge(number_of_authors, on='author', how='left')
+            author_pivot_coord = author_pivot_coord.sort_values('numOcc', ascending=False)
+            author_pivot_coord['ID'] = author_pivot_coord.index
+            author_pivot_coord = author_pivot_coord[['ID', 'author', 'xcoor', 'ycoor', 'numOcc']]
+            author_pivot_coord.columns = ['ID', 'name', 'xcoor', 'ycoor', 'weight'] 
+            author_pivot_coord.to_sql('autC', outputdata_db_connection, if_exists='replace')
 
         # STEP 8 - finding mean coordinates and sum cites for individual Journals      
-            #instMerge = pd.merge(dfStep2, wosCoordPivot, on='wosid', how='left')
-            
+
             ##  mean coordinates
-            journalPivotCoor = pd.pivot_table(wosCoor, index=['journal'],
+            journal_pivot_coor = pd.pivot_table(wosCoor, index=['journal'],
                                         values=['xcoor', 'ycoor'],
                                         aggfunc=calculation_mode)
-            journalPivotCoor = journalPivotCoor[['xcoor', 'ycoor']].iloc[1:]
-            journalPivotCoor.reset_index(inplace=True)
+            journal_pivot_coor = journal_pivot_coor[['xcoor', 'ycoor']].iloc[1:]
+            journal_pivot_coor.reset_index(inplace=True)
 
            ##  sum cites
-            journalPivotCites = pd.pivot_table(wosCoor, index=['journal'],
+            journal_pivot_cites = pd.pivot_table(wosCoor, index=['journal'],
                                         values=['cites'],
                                         aggfunc='sum')
-            journalPivotCites = journalPivotCites[['cites']].iloc[1:]
-            journalPivotCites.reset_index(inplace=True)
+            journal_pivot_cites = journal_pivot_cites[['cites']].iloc[1:]
+            journal_pivot_cites.reset_index(inplace=True)
            
             ##  merging tables
-            journalPivotCoor = journalPivotCoor.merge(journalPivotCites, on='journal', how='left')
-            #journalPivotCoor = journalPivotCoor.merge(countPivotCount, on='country', how='left')
-            journalPivotCoor.columns = ['journal', 'xcoor','ycoor', 'cites']
-            journalPivotCoor.to_sql('jourC', outputdata_db_connection, if_exists='replace')
-
-
+            journal_pivot_coor = journal_pivot_coor.merge(journal_pivot_cites, on='journal', how='left')
+            #journal_pivot_coor = journal_pivot_coor.merge(counttry_pivot_count, on='country', how='left')
+            journal_pivot_coor.columns = ['journal', 'xcoor','ycoor', 'cites']
+            journal_pivot_coor.to_sql('jourC', outputdata_db_connection, if_exists='replace') 
             
-
         # STEP 9 - closing connection
             outputdata_db_connection.close()
             print('... step 7 - preparation of map, including last step in: ' + str(datetime.datetime.now() - begin_time))     
