@@ -6,7 +6,7 @@ and important and required data files and folder structure
 Latest version: April 11 2021
 '''
 
-st.header("SCIENCE MAPPING HOME")
+st.header("SCIENCE MAPPING: HOME")
 st.markdown('___')
 
 exec(open("config.py").read())  # file with stored basic information - must be updated for a new project
@@ -37,8 +37,9 @@ with st.expander("Overview of processes and available maps ..."):
         ##### Map 1: Maps distribution of papers in several categories 
     """)
 
-    for t in range(expander_space):
-        st.write(' ')
+
+add_empty_lines(expander_space)
+
 
 # FOLDER AND FILES EXPANDER
 with st.expander("Folders and files ..."):
@@ -61,8 +62,7 @@ with st.expander("Folders and files ..."):
         structure above
     """)
 
-    for t in range(expander_space):
-        st.write(' ')
+add_empty_lines(expander_space)
 
 # CONFIG EXPANDER
 with st.expander("Check of paths and files in project config.txt ..."):
@@ -86,5 +86,4 @@ with st.expander("Check of paths and files in project config.txt ..."):
     st.write(' ')
     st.write('Edit the config.py file in a text editor to add more workspaces')
 
-    for t in range(expander_space):
-        st.write(' ')
+add_empty_lines(expander_space)

@@ -245,18 +245,21 @@ if run_script:
             df_keywords_with_coor.columns = ['keyword', 'xcoor', 'ycoor', 'wosid', 'year']
 
             df_keywords_with_coor.to_sql('papK', outputdata_db_connection, if_exists='replace')
-
+            
         # STEP 4 - calculating coordinates for WoS subject categories
-            mergeCatCoord = pd.merge(wosCat, wosCoordPivot, on='wosid', how='left')
+            mergeCatCoord = pd.merge(wosCat, wosCoordPivot, on='wosid', how='left')          
             mergeCatCoord = mergeCatCoord[['wosid', 'category', 'xcoor', 'ycoor',
                     'year']]
+            
             wosCatPivot = pd.pivot_table(mergeCatCoord, index=['category'],
-                    aggfunc=calculation_mode)
+                            values=['xcoor', 'ycoor'],
+                            aggfunc=calculation_mode)
             wosCatPivot.reset_index(inplace=True)
-
+            
             # Counting unique occurrences of subject categories
-            catCount = pd.DataFrame(wosCat['category'].value_counts())
+            catCount = pd.DataFrame(wosCat['category'].value_counts())  
             catCount['label'] = catCount.index
+            catCount.index = range(len(catCount))
             catCount.columns = ["numOcc", "category"]
             catCount = catCount[["category", "numOcc"]]
             
@@ -264,23 +267,24 @@ if run_script:
             wosCatPivot = wosCatPivot.merge(catCount, on='category', how='left')
             wosCatPivot = wosCatPivot.dropna()
             wosCatPivot = wosCatPivot.sort_values('numOcc', ascending=False)
-            wosCatPivot = wosCatPivot.drop('year', axis=1)
+            #wosCatPivot = wosCatPivot.drop('year', axis=1)
             wosCatPivotW = wosCatPivot
-            wosCatPivotW.columns = ['cat', 'xcoor','ycoor', 'weight']
+            wosCatPivotW.columns = ['category', 'xcoor','ycoor', 'weight']
             wosCatPivotW.to_sql('catC', outputdata_db_connection, if_exists='replace')
             
             # WoS-id, category, x- and y-coordinates + numOcc (for Bokeh graph)
             mergeCatCoord = mergeCatCoord.merge(catCount, on='category', how='left')
             mergeCatCoord = mergeCatCoord.dropna()
             mergeCatCoord = mergeCatCoord[mergeCatCoord['numOcc'] > 5]
+            
             mergeCatCoord = mergeCatCoord.merge(wosCoor, on='wosid', how='left')
             mergeCatCoord = mergeCatCoord[['wosid','category','xcoor_x','ycoor_x',
                     'year_y','numOcc']]
-            mergeCatCoord.columns = ['wosid','cat','xcoor','ycoor', 'year', 'weight']        
+            mergeCatCoord.columns = ['wosid','category','xcoor','ycoor', 'year', 'weight']        
             mergeCatCoord.to_sql('catD', outputdata_db_connection, if_exists='replace')
             
             # And then for catK  -  all combinations of keyords and category
-            catKmerge = pd.merge(keywords_df, mergeCatCoord)
+            catKmerge = pd.merge(keywords_df, mergeCatCoord)          
             catKmerge.to_sql('catK', outputdata_db_connection, if_exists='replace')    
         
         # STEP 5 - finding mean coordinates and sum cites for countries      
@@ -299,10 +303,13 @@ if run_script:
                                         aggfunc='sum')
             countPivotCites = countPivotCites[['cites']].iloc[1:]
             countPivotCites.reset_index(inplace=True)
+            
 
             ## number of authorships per institute
             countPivotCount = pd.DataFrame(dfStep2['country'].value_counts())
+            
             countPivotCount['label'] = countPivotCount.index
+            countPivotCount.index = range(len(countPivotCount))
             countPivotCount.columns = ["numOcc", "country"]
             countPivotCount = countPivotCount[["country", "numOcc"]]
             
@@ -331,6 +338,7 @@ if run_script:
             ## number of authorships per institute
             instPivotCount = pd.DataFrame(dfStep2['institution'].value_counts())
             instPivotCount['label'] = instPivotCount.index
+            instPivotCount.index = range(len(instPivotCount))
             instPivotCount.columns = ["numOcc", "institution"]
             instPivotCount = instPivotCount[["institution", "numOcc"]]
 
@@ -450,13 +458,18 @@ if run_script:
             autMergeK.to_sql('autK', outputdata_db_connection, if_exists='replace')
             
             autPivotCoord = pd.pivot_table(autMerge, index=['author'],
+                    values=['xcoor', 'ycoor'],
                     aggfunc=calculation_mode)
+            
+            st.dataframe(autPivotCoord)
+            
             autPivotCoord.reset_index(inplace=True)
             autPivotCoord = autPivotCoord.dropna()
             
             # Counting unique occurrences and adding IDs
             autCount = pd.DataFrame(autWos['author'].value_counts())
             autCount['label'] = autCount.index
+            autCount.index = range(len(autCount))
             autCount.columns = ["numOcc", "author"]
             autCount = autCount[["author", "numOcc"]]
             autPivotCoord = autPivotCoord.merge(autCount, on='author', how='left')

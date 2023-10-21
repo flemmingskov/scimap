@@ -22,8 +22,7 @@ with st.expander("About ..."):
         This keyword vocabulary will be used to extract keywords from title and abstract.
     """)
 
-    for t in range(expander_space):
-        st.write(' ')
+add_empty_lines(expander_space)
 
 # WORKSPACE & FILE EXPANDER
 with st.expander("Workspace and data bases ..."):
@@ -65,10 +64,11 @@ if run_script:
 
     try:
         with st.spinner('Preparing vocabulary ...'):
-
             synonyms = import_synonyms()
-            (wosid_list, year_list, orig_list, clean_list, comb_list, keyword_list) = \
-                ([], [], [], [], [], [])
+            
+            #st.write(synonyms)
+            
+            (wosid_list, year_list, orig_list, clean_list, comb_list, keyword_list) = ([], [], [], [], [], [])
             
             for row in dataIn.itertuples(index=False):
                 concat_clean = []
@@ -79,7 +79,7 @@ if run_script:
                     keyword_list = row[3]     
 
                 for kw in keyword_list.split(";"):  # iterate over all keywords in one article
-                    cleaned_keyword = clean_keyword(kw)
+                    cleaned_keyword = clean_keyword(kw, synonyms)
                     wosid_list.append(row[14])
                     year_list.append(row[11])
                     orig_list.append(kw)

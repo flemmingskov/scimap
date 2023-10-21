@@ -69,6 +69,7 @@ st.write(' ')
 run_script =  st.button('Run script')
 
 if run_script:
+    synonyms = import_synonyms()
     begin_time = datetime.datetime.now()
 
     conn = sqlite3.connect(data_depository)
@@ -108,7 +109,7 @@ if run_script:
                         keyword_list = row[2]
                         concat_clean = ''
                         for kw in keyword_list.split(";"):
-                            cleaned_keyword = clean_keyword(kw)
+                            cleaned_keyword = clean_keyword(kw, synonyms)
                             if concat_clean == '':
                                 concat_clean = cleaned_keyword
                             else:
@@ -119,7 +120,7 @@ if run_script:
                         keyword_list = row[3]
                         concat_clean = ''
                         for kw in keyword_list.split(";"):
-                            cleaned_keyword = clean_keyword(kw)
+                            cleaned_keyword = clean_keyword(kw, synonyms)
                             if concat_clean == '':
                                 concat_clean = cleaned_keyword
                             else:
@@ -129,14 +130,14 @@ if run_script:
                 # extracting keywords from title
                 if run_title:
                     title_text = row[1]
-                    keywords_in_title = extract_keywords_from_text(title_text, keywords_approved) 
+                    keywords_in_title = extract_keywords_from_text(title_text, keywords_approved, synonyms) 
                     data_to_be_processed.loc[index,['kw_title']] = keywords_in_title
         
                 # extracting keywords from abstract
                 if run_abstract:
                     abstract_text = row[4]
                     if abstract_text != '':
-                        keywords_in_abstract = extract_keywords_from_text(abstract_text, keywords_approved)
+                        keywords_in_abstract = extract_keywords_from_text(abstract_text, keywords_approved, synonyms)
                         data_to_be_processed.loc[index,['kw_abst']] = keywords_in_abstract
                     else:
                         data_to_be_processed.loc[index,['kw_abst']] = ''

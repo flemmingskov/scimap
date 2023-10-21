@@ -65,7 +65,7 @@ with st.expander("Show basic layout and data ..."):
         wdegree_level = st.slider('Weighted degree (show only keywords with a value above in the original diagram):', min_value=0, max_value=2500, value=0, step=100, key='wdegreelevel')
         keyword_FR_sel = keyword_FR[keyword_FR['wdegree']>= wdegree_level]
 
-        sns.kdeplot(data = keyword_FR_sel, x = 'xcoor', y = 'ycoor', alpha = 0.55, shade=True, legend=False, thresh=0.01)
+        sns.kdeplot(data = keyword_FR_sel, x = 'xcoor', y = 'ycoor', alpha = 0.55, fill=True, legend=False, thresh=0.01)
         sns.kdeplot(data = keyword_FR_sel, x = 'xcoor', y = 'ycoor', n_levels=10, cmap=plt.cm.winter)
         plt.scatter(keyword_FR_sel['xcoor'], keyword_FR_sel['ycoor'], alpha=0.4, s=3, label=None, c='blue')
         plt.xlabel('x')
@@ -180,7 +180,7 @@ if run_FR_adjust:
             fig = plt.figure(figsize=(15,15))
             ax = plt.axes()
             
-            sns.kdeplot(data=data_temp, x = 'xcoor', y = 'ycoor', alpha = 0.55, shade=True, legend=False, thresh=0.01)
+            sns.kdeplot(data=data_temp, x = 'xcoor', y = 'ycoor', alpha = 0.55, fill=True, legend=False, thresh=0.01)
             sns.kdeplot(data= data_temp, x = 'xcoor', y = 'ycoor', n_levels=10, cmap=plt.cm.winter)
             plt.scatter(data_temp['xcoor'], data_temp['ycoor'], alpha=0.4, s=3, label=None, c='blue')
             plt.xlabel('x')

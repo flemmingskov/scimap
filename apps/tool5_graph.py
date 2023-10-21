@@ -8,7 +8,7 @@ Latest version: May 16 2023
 
 # Import packages for graph and network analyses
 import igraph as ig
-import louvain
+#import louvain
 import leidenalg as la
 
 st.header("BASIC GRAPH LAYOUT")

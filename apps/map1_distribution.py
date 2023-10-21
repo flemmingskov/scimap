@@ -22,7 +22,7 @@ if mapping_unit == 'Researchers':
     data_papers_table = 'papI'
 elif mapping_unit == 'Subject categories':
     data_shade_center_table = 'catC'
-    column_identifier = 'cat'
+    column_identifier = 'category'
     sort_column = 'weight'
     data_shade_points_table = 'catD'
     data_keywords_table = 'catK'
@@ -59,7 +59,7 @@ st.subheader('CONTROLS & SETTINGS')
 
 exec(open("config.py").read())  # file with stored basic information
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data   #suppress_st_warning=True
 def import_data(overlay_db, table_select):
     connection_db = sqlite3.connect(overlay_db)
     table_to_import = pd.read_sql_query('select * from ' + table_select + ';', connection_db)
@@ -268,7 +268,7 @@ if contour_on:
     sns.kdeplot(data=data_to_show, x ='xcoor', y='ycoor', color = shade_color, \
         alpha = 1, n_levels=number_of_levels, legend=False)
 if shade_on:
-    sns.kdeplot(data=data_to_show, x ='xcoor', y='ycoor', shade=True, color = shade_color, \
+    sns.kdeplot(data=data_to_show, x ='xcoor', y='ycoor', fill=True, color = shade_color, \
         alpha = shade_alpha, n_levels=number_of_levels, thresh=low_thresh, legend=False)
 
 # individual points
