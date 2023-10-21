@@ -1,4 +1,5 @@
 ## THIS IS THE NEW REBUILDING THING THAT BRANCHED AWAY
+## WITH AN EXTRA COMMENT NOW
 
 
 ## Setting paths to files and folders
