@@ -1,3 +1,6 @@
+## THIS IS THE NEW REBUILDING THING THAT BRANCHED AWAY
+
+
 ## Setting paths to files and folders
 
 if (platform.system() == 'Darwin'):
