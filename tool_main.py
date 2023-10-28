@@ -40,23 +40,8 @@ plt.style.use("seaborn-v0_8-whitegrid")
 # Others
 wnl = WordNetLemmatizer()
 
-
-# import streamlit as st
-# import os, time, datetime, sqlite3, platform, logging, itertools, re, math, sys, random
-# import copy
-# import pandas as pd
-# import numpy as np
-# from nltk.stem import WordNetLemmatizer
-# import altair as alt
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-# plt.style.use("seaborn-v0_8-whitegrid")
-# #plt.style.use('seaborn-whitegrid')
-# from nltk.stem import WordNetLemmatizer
-# from adjustText import adjust_text
-# from nltk.corpus import stopwords
-# from nltk.tokenize import word_tokenize
-# from matplotlib import ticker
+# Precompute the set of stopwords
+stop_words_set = set(stopwords.words('english'))
 
 
 exec(open("./apps/function_library.py").read())

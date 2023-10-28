@@ -66,8 +66,6 @@ if run_script:
         with st.spinner('Preparing vocabulary ...'):
             synonyms = import_synonyms()
             
-            #st.write(synonyms)
-            
             (wosid_list, year_list, orig_list, clean_list, comb_list, keyword_list) = ([], [], [], [], [], [])
             
             for row in dataIn.itertuples(index=False):

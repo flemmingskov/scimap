@@ -69,7 +69,8 @@ st.write(' ')
 run_script =  st.button('Run script')
 
 if run_script:
-    c
+    synonyms = import_synonyms()
+    synonyms = set(synonyms())
     begin_time = datetime.datetime.now()
 
     conn = sqlite3.connect(data_depository)
@@ -79,6 +80,7 @@ if run_script:
     keywords_approved = pd.read_sql_query('select * from vocabulary;', conn)
     keywords_approved = keywords_approved[keywords_approved['keyword_count'] >= low_cut]
     keywords_approved = keywords_approved['keyword'].tolist()
+    keywords_approved = set(keywords_approved)
 
     search_string = """(links_df.category != 'dummyCriteria')"""
     subset = (links_df.loc[eval(search_string), ['wosid']]
@@ -101,7 +103,6 @@ if run_script:
 
             for index, row in data_to_be_processed.iterrows(): 
             
-
                 # cleaning regular keywords
                 if run_keywords:
                     with st.spinner('processing regular keywords ...'):
