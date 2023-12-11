@@ -70,7 +70,9 @@ run_script =  st.button('Run script')
 
 if run_script:
     synonyms = import_synonyms()
-    synonyms = set(synonyms())
+    # synonym_keys_set = set(synonyms.keys())
+    # st.write(synonym_keys_set)
+    # synonyms = set(synonyms())
     begin_time = datetime.datetime.now()
 
     conn = sqlite3.connect(data_depository)

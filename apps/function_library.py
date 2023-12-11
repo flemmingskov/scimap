@@ -1,31 +1,53 @@
 # FUNCTION LIBRARY
 # This file contains a few functions that are used from individual scripts in the tool
 
+# def get_platform():
+#     # Are we running on Mac or PC?
+#     system = platform.system()
+#     if system == 'Darwin':
+#         mainwork = '/Users/au3406/Desktop/'
+#     else:
+#         mainwork = 'C:/Users/au3406/iCloudDrive/Desktop/'
+#     return mainwork
+
+
 def get_platform():
-    # Are we running on Mac or PC?
+    # Determine the current operating system
     system = platform.system()
-    if system == 'Darwin':
-        mainwork = '/Users/au3406/Desktop/'
+
+    # Retrieve the user's desktop path based on the operating system
+    if system == "Darwin":
+        # For macOS, use the `~/Desktop` path
+        mainwork = os.path.expanduser("~/Desktop/")
     else:
-        mainwork = 'C:/Users/au3406/iCloudDrive/Desktop/'
+        # For Windows, use the `C:/Users/<username>/iCloudDrive/Desktop` path
+        mainwork = os.path.join(os.path.expanduser("~"), "iCloudDrive", "Desktop")
+
     return mainwork
 
 def map_bearing(x, y, center_x, center_y):
     """
-    Calculate the bearing (direction angle) from the center point to a target point.
-    Parameters: x (float): X-coordinate of the target point - y (float): Y-coordinate of the target point.
-    center_x (float): X-coordinate of the center point.  - center_y (float): Y-coordinate of the center point.
-    Returns: float: The bearing angle in degrees, ranging from 0 to 359.
+    Calculates the bearing (direction angle) from the center point to a target point.
+    Args:
+        x (float): X-coordinate of the target point
+        y (float): Y-coordinate of the target point
+        center_x (float): X-coordinate of the center point
+        center_y (float): Y-coordinate of the center point
+    Returns:
+        float: The bearing angle in degrees, ranging from 0 to 359
     """
+    
     angle = math.degrees(math.atan2(y - center_y, x - center_x))
     bearing = (90 - angle) % 360
     return bearing
 
 def import_synonyms():
     """
-     Import synonyms from an Excel file and store them in a Python dictionary. 
-     Returns: dict: A dictionary containing synonyms where keys are keywords and values are synonym keywords.
+    Import synonyms from an Excel file and store them in a Python dictionary.
+    Returns:
+        dict: A dictionary containing synonyms where keys are keywords and values are synonym keywords.
     """
+    
     xlDic = pd.ExcelFile(get_platform()+'github/scimap/aliasDic.xlsx')
     dict_df = xlDic.parse('keys')
     synonyms = {}
@@ -40,7 +62,8 @@ def normalize(values, bounds):
     Normalize a list of values based on specified bounds.
     Parameters: values (list): A list of values to be normalized.
     bounds (dict): A dictionary containing 'desired' and 'actual' bounds, where 'lower' and 'upper' keys are expected.
-    Returns:A list of normalized values.
+    Returns:
+        A list of normalized values.
     """
     return [bounds['desired']['lower'] + (x - bounds['actual']['lower']) * (bounds['desired']['upper'] - bounds['desired']['lower']) / (bounds['actual']['upper'] - bounds['actual']['lower']) for x in values]
 
