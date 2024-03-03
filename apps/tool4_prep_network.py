@@ -64,16 +64,23 @@ if run_script:
 
         # Read data from the 'keyword_collection' table, filtering out rows with empty 'kw_title'
         with sqlite3.connect(data_depository) as conn:
-            dataframe_input = pd.read_sql_query('SELECT * FROM keyword_collection WHERE kw_title <> ""', conn).fillna('')
+            dataframe_input = pd.read_sql_query('SELECT * FROM keyword_collection WHERE kw1_clean <> ""', conn).fillna('')
             # Read data from the 'vocabulary' table
             keyword_count = pd.read_sql_query('SELECT * FROM vocabulary', conn)
+            
+            st.write(dataframe_input.head(5))   
 
     except sqlite3.Error as e:
         print("SQLite Error:", e)
         
+        
+    
+    
     try:
         with st.spinner('Processing node and edge files ...'):
             combined_list = []
+            
+            
 
             for index, row in dataframe_input.iterrows():
                 keyword_str = ''       
@@ -90,7 +97,6 @@ if run_script:
                 keyword_list = list(keyword_str.split(";"))
                 keyword_list = list(set(keyword_list))
                 combined_list.append(list(itertools.combinations(keyword_list, 2)))
-
 
             focus_list = []
             target_list = []

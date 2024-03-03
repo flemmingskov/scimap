@@ -173,9 +173,9 @@ with st.expander("Filters ..."):
     export_file_suggested_name = category_select.lower().replace(' ', '').replace(',', '') + '.png'
 
     col1, col2 = st.columns([2, 2])
-    start_year = col1.number_input('Choose records from year:', min_value=1965, max_value=2022, value=1980, \
+    start_year = col1.number_input('Choose records from year:', min_value=1890, max_value=2022, value=1899, \
         step=1 , format=None, key='start_y', help=None)
-    steps_year = col2.number_input('.. plus time span in years', min_value=0, max_value=75, value=45, \
+    steps_year = col2.number_input('.. plus time span in years', min_value=0, max_value=200, value=45, \
         step=5, format=None, key='step_y', help=None)
     end_year = start_year + steps_year
 
@@ -190,8 +190,6 @@ with st.expander("Filters ..."):
     data_shade_points = import_data(overlay_db, data_shade_points_table)
     data_shade_points = data_shade_points[((data_shade_points['year']>= start_year) & \
             (data_shade_points['year']<= end_year))]
-
-    
 
 
     # preparing data
@@ -245,7 +243,7 @@ fig = plt.figure(figsize=figsize)
 ax = plt.axes()
 
 if show_title:
-    fig_title = category_select.lower() + ' - ' + str(start_year) + '-' + str(end_year)
+    fig_title = category_select.lower() + ' - ' + str(start_year) + '-' + str(end_year) + ' (' + str(len(selected_category.index)) + ')'
 else:
     fig_title = " "
 plt.title(fig_title, fontsize=35)
@@ -306,7 +304,7 @@ if st.checkbox('Show records in chosen category', value=False, key='show_df_cate
     st.dataframe(data_to_show)
 
 ## TO BE REMOVED !!!
-export_file_suggested_name = 'all' + str(start_year) + '_' + str(end_year)
+export_file_suggested_name = str(start_year) + '-' + str(end_year) + ' (' + str(len(selected_category.index)) + ')'
 
 with st.expander("Export map ..."):
     destination = st.text_input("Export to:", value=my_workspace, key="export_destination")

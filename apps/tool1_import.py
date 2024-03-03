@@ -120,7 +120,7 @@ if run_script:
             imported_data_df[["cites", "year"]] = imported_data_df[["cites", "year"]].apply(pd.to_numeric, \
                     errors='coerce')
 
-            imported_data_df.loc[imported_data_df['year'] < 1920, 'year'] = np.nan
+            imported_data_df.loc[imported_data_df['year'] < 1800, 'year'] = np.nan
             imported_data_df = imported_data_df.dropna(subset=['year', 'wosid'])
 
             imported_data_df['year'] = imported_data_df.year.astype(int)
