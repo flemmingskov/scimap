@@ -190,7 +190,3 @@ if run_script:
         print('... step 1 - imported WoS records to data base: ' + str(datetime.datetime.now() - begin_time))
 
 # Notes
-
-'''
-
-'''
