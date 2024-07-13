@@ -94,9 +94,12 @@ if run_script:
             keyword_count.columns = ["keyword_count", "keyword"]
 
             ## LIST of keywords to erase from vocabulary
-            # for delete_kw in ['biogeography', 'pattern', 'north', 'northern', 'south', 'southern', 
-            #                     'east', 'eastern', 'west', 'western']:
-            for delete_kw in ['response', 'performance', 'system', 'physiology', 'dynamic', 'consequence', 'increase']:
+            # biogeo_delete_words =['biogeography', 'pattern', 'north', 'northern', 'south', 'southern', 
+            #                      'east', 'eastern', 'west', 'wester']
+            # zoophys_delete_words = ['response', 'performance', 'system', 'physiology', 'dynamic', 'consequence', 'increase']
+            rewilding_delete_words = ['ecosystem-service', 'conservation', 'ecological-restoration', 'restoration', 'impact', 'dynamic', 'management', 'ecosystem-management']
+           
+            for delete_kw in rewilding_delete_words:
                 keyword_count.drop(keyword_count.loc[keyword_count['keyword']==delete_kw].index, inplace=True)
                 
             keyword_count = keyword_count.reset_index(drop=True)
@@ -111,7 +114,7 @@ if run_script:
             eight = total_count - len(keyword_count[keyword_count['keyword_count'] <= 24])
 
             # st.markdown(
-            # f"""Total number of keywords is {total_count}. Number of keywords with two or 
+            # f"""Total umber of keywords is {total_count}. Number of keywords with two or 
             # more occurrences: {ones}. Number of keywords with three or 
             # more occurrences: {twos}""") 
 

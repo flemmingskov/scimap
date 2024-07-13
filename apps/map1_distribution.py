@@ -173,7 +173,7 @@ with st.expander("Filters ..."):
     export_file_suggested_name = category_select.lower().replace(' ', '').replace(',', '') + '.png'
 
     col1, col2 = st.columns([2, 2])
-    start_year = col1.number_input('Choose records from year:', min_value=1890, max_value=2022, value=1899, \
+    start_year = col1.number_input('Choose records from year:', min_value=1890, max_value=2022, value=1990, \
         step=1 , format=None, key='start_y', help=None)
     steps_year = col2.number_input('.. plus time span in years', min_value=0, max_value=200, value=45, \
         step=5, format=None, key='step_y', help=None)
