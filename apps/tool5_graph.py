@@ -10,6 +10,8 @@ Latest version: May 16 2023
 import igraph as ig
 import leidenalg as la
 
+import sys
+
 st.header("BASIC GRAPH LAYOUT")
 st.markdown('___')
 st.subheader('CONTROLS & SETTINGS')
@@ -75,7 +77,11 @@ if run_script:
                     strings = line.rstrip().split(",")
                     node_labels.append(str(strings[1]))
                     line = nodes_file.readline() 
-            n_vertices = len(node_labels)        
+            n_vertices = len(node_labels)  
+            
+            ######### ROADWORK
+            st.write(node_labels)    
+            sys.exit() 
 
         # read edge file
             edges = []
@@ -87,6 +93,10 @@ if run_script:
                     edges.append(((int(strings[0])-1), (int(strings[1])-1)))
                     weights.append(float(strings[2]))
                     line = edges_file.readline()
+
+ 
+
+
 
         # Create graph and add n vertices
             g = ig.Graph()
