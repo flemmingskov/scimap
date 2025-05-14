@@ -108,6 +108,7 @@ with st.expander("Adjustment settings  ..."):
 
 # EXPANDED DATA
 run_FR_adjust =  st.checkbox('Show adjusted layout', value=False,  key='runFRexp')
+
 if run_FR_adjust:
     begin_time = datetime.datetime.now()
 

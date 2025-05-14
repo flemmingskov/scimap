@@ -14,7 +14,7 @@ import sys
 
 st.header("BASIC GRAPH LAYOUT")
 st.markdown('___')
-st.subheader('CONTROLS & SETTINGS')
+st.subheader('CONTROLS & SETTINGS 2')
 
 exec(open("config.py").read())  # file with stored basic information
 
@@ -80,8 +80,8 @@ if run_script:
             n_vertices = len(node_labels)  
             
             ######### ROADWORK
-            st.write(node_labels)    
-            sys.exit() 
+            #st.write(node_labels)    
+            #sys.exit() 
 
         # read edge file
             edges = []
@@ -93,10 +93,6 @@ if run_script:
                     edges.append(((int(strings[0])-1), (int(strings[1])-1)))
                     weights.append(float(strings[2]))
                     line = edges_file.readline()
-
- 
-
-
 
         # Create graph and add n vertices
             g = ig.Graph()
